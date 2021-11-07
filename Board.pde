@@ -4,11 +4,11 @@ class Board {
   private int n;
   private int h;
   private int[][] cells;
-  private int[][] nextH;
+
   public Board(int[][] b) {
     this.cells = b;
     n = cells.length;
-    nextH = new int[n][n];
+    //nextH = new int[n][n];
     //children = new Board[n][n];
     ev();
   }
@@ -21,7 +21,7 @@ class Board {
         cells[i][j] = 0;
       }
     }
-    nextH = new int[n][n];
+    //nextH = new int[n][n];
     //children = new Board[n][n];
     generateRandomQueens(n);
     ev();
@@ -37,57 +37,7 @@ class Board {
       cells[i][rand.nextInt(size - 1)] = 1;
     }
   }
-  public void calculateNextStep() {
 
-
-    for (int i =0; i < cells.length; i++) {
-      int[] temp = cells[i];
-      int[][] c = cells;
-
-      for (int j = 0; j < cells.length; j++) {
-        c[i] = new int[cells.length];
-        for (int x =0; x < cells.length; x++) {
-          c[i][x] = 0;
-        }
-        c[i][j] = 1;
-        //children[i][j] = new Board(c);
-        nextH[i][j] = new Board(c).h;
-      }
-      c[i] = temp;
-    }
-    int ii = 0;
-    int jj = 0;
-    int min = h;
-    for (int i =0; i < cells.length; i++) {
-      for (int j = 0; j < cells.length; j++) {
-        if (nextH[i][j] < min) {
-          min = nextH[i][j];
-          ii = i;
-          jj = j;
-        }
-      }
-    }
-    Board best = this;
-
-    for (int i =0; i < cells.length; i++) {
-      if (i == ii) {
-        for (int x =0; x < cells.length; x++) {
-          best.cells[i][x] = 0;
-        }
-
-        best.cells[i][jj] = 1;
-      }
-    }
-
-    for (int i =0; i < cells.length; i++) {
-      for (int j = 0; j < cells.length; j++) {
-        print(nextH[i][j]+ " ");
-      }
-      println();
-    }
-    println(ii+ " "+jj);
-    println(best.toString());
-  }
   public void calculateH() {
   }
   public int ev() {
@@ -140,8 +90,9 @@ class Board {
 
 
 
-  public void drawBoard() {
-    int a = round(height/cells.length);
+  public void drawBoard(int steps) {
+    background(255);
+    int a = round(height/n);
     for (int x = 0; x <n; x++) {
       for (int y = 0; y <n; y++) {
         if (cells[x][y] == 1) {
@@ -154,6 +105,8 @@ class Board {
       stroke(0);
       line(0, round(x*a), width, round(x*a));
     }
+    fill(0);
+    text("Steps: "+steps, 10, 15);
   }
   @Override
     public String toString() {

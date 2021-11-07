@@ -1,88 +1,135 @@
-int N = 8;
-
+int n = 8;
+Board b;
+private int[][] nextH = new int[n][n];
+int[] status = new int[1000];
+int[] steps = new int[1000];
+int counter;
+int i1 =0;
 void setup() {
   size(1000, 1000); //size of the window
   background(255);//setting white background
-  Board b = new Board(4);
+  for (int i =0; i< steps.length; i++) {
+    status[i] = 0;
+    steps[i] = 0;
+  }
+      for (int i =0; i< steps.length; i++) {
+        b = new Board(n);
+        b.drawBoard(steps[i1]);
 
+        while (true) {
+          if (status[i1] ==0) {
+            b = calculateNextStep(b);
+            b.drawBoard(steps[i1]);
+            println(steps[i1]);
+          } else if (status[i1] == 1) {
+            println("won");
+            break;
+          } else if (status[i1] == -1) {
+            println("local max");
+            break;
+          }
+        }
+        counter++;
+        i1++;
+      }
   //hillClimbing(b);
-    b.drawBoard();
-  b.calculateNextStep();
+  //println(b.toString());
+  int win_count = 0;
+  int win_avg = 0;
+    int lose_count = 0;
+  int lose_avg = 0;
+    for(int i =0; i< steps.length; i++){
+    if(status[i] == 1){
+      win_count++;
+      win_avg += steps[i];
+    }else if(status[i] == -1){
+            lose_count++;
+      lose_avg += steps[i];
+    }
+  }
+  println("Won " + win_count+ " of ",steps.length+"with average of:"+ win_avg/win_count);
+  println("Local Max " + lose_count+ " of ",steps.length+"with average of:"+ lose_avg/lose_count);
+}
+void draw() {
+}
+void keyPressed() {
+  if (key == CODED) {
+    if (keyCode == UP) {
+    }
+  }
 }
 
 
-public void hillClimbing(Board board) {
-  boolean isLocalMax = false, continueSearch = true;
-  Board currentBoard = new Board(board.getBoard()); // copy of the board
-  int iterations = 0;
-  int globalMax = 0;
 
-  while (continueSearch) {
-    if (currentBoard.h == 0) { // check if the board configuration is the goal board
-      System.out.println("=================Solution Found=================" + "\nNumber of iterations: "
-        + iterations + "\nEvaluation Function: " + currentBoard.h
-        + "\nBoard Configuration:\n" + currentBoard.toString());
-      continueSearch = false;
-      break;
+public Board calculateNextStep(Board current) {
+  int[][] cells = current.getBoard();
+  boolean isLocalMax = false;
+  boolean win = false;
+  if (!isLocalMax && !win) {
+    for (int i =0; i < cells.length; i++) {
+      int[] temp = cells[i];
+      int[][] c = cells;
+
+      for (int j = 0; j < cells.length; j++) {
+        c[i] = new int[cells.length];
+        for (int x =0; x < cells.length; x++) {
+          c[i][x] = 0;
+        }
+        c[i][j] = 1;
+        //children[i][j] = new Board(c);
+        nextH[i][j] = new Board(c).h;
+      }
+      c[i] = temp;
+    }
+    for (int i =0; i < cells.length; i++) {
+      for (int j = 0; j < cells.length; j++) {
+        print(nextH[i][j]+ " ");
+      }
+      println();
+    }
+    int ii = 0;
+    int jj = 0;
+    int min = current.h;
+    for (int i =0; i < cells.length; i++) {
+      for (int j = 0; j < cells.length; j++) {
+        if (nextH[i][j] < min) {
+          min = nextH[i][j];
+          ii = i;
+          jj = j;
+        }
+      }
+    }
+    println("min: "+min + " h:" + current.h);
+    if (min == current.h) {
+      println("local max");
+      isLocalMax = true;
+      status[counter] = -1;
+      return current;
     } else {
-      for (int i = 0; i < currentBoard.getBoard().length; i++) {
-        Board bestSuccessor = generateSuccessor(currentBoard, i);
-        if (bestSuccessor.h < currentBoard.h) {
-          currentBoard = bestSuccessor;
-          iterations++;
-          isLocalMax = false;
-        } else {
-          isLocalMax = true;
+      if (min == 0) {
+        println("win");
+        win = true;
+        status[counter] = 1;
+      }
+      Board best = current;
+
+      for (int i =0; i < cells.length; i++) {
+        if (i == ii) {
+          for (int x =0; x < cells.length; x++) {
+            best.cells[i][x] = 0;
+          }
+
+          best.cells[i][jj] = 1;
         }
       }
 
-      if (isLocalMax) {
-        System.out.println(
-          "=================Local Maximum Encoutered=================" + "\nNumber of iterations: "
-          + iterations + "\nEvaluation Function: " + currentBoard.h
-          + "\nLocal Maximum Board Configuration:\n" + currentBoard.toString());
-          currentBoard.drawBoard();
-        continueSearch = false;
-        break;
-      }
-    }
-  }
-}
-public Board generateSuccessor(Board board, int row) {
-  ArrayList<Board> children = new ArrayList<Board>();
-  Board bestChild;
-
-  for (int col = 0; col < board.getBoard().length; col++) {
-    if (board.getBoard()[row][col] != 1) { // the element is not a queen
-      int child[][] = new int[board.getBoard().length][board.getBoard().length];
-      child[row][col] = 1; // move queen to this column
-
-      for (int i = 0; i < child.length; i++) {
-        if (i != row) {
-          child[i] = board.getBoard()[i];
-        }
-      }
-      children.add(new Board(child)); // create board object from the generated new board
-      // add successor to children list
+      //println(ii+ " "+jj);
+      //println(best.toString());
+      best.ev();
+      steps[counter]++;
+      return best;
     }
   }
 
-  bestChild = children.get(0);
-
-  for (int z = 1; z < children.size(); z++) {
-    int bestEv = bestChild.h;
-    int nextEv = children.get(z).h;
-
-    if (nextEv < bestEv) {
-      bestChild = children.get(z);
-    } else if (nextEv == bestEv) {
-      Random rand = new Random();
-      int choose = (int) (rand.nextInt(2));
-      if (choose == 1) {
-        bestChild = children.get(z);
-      }
-    }
-  }
-
-  return bestChild;
+  return null;
 }
