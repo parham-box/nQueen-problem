@@ -59,8 +59,15 @@ void setup() {
       lose_avg += steps[i];
     }
   }
+  if (win_count != 0)
   println("Won " + win_count+ " of ", steps.length+"with average of:"+ win_avg/win_count);
+  else
+    println("Won " + win_count+ " of ", steps.length+"with average of:"+ 0);
+  if (lose_count != 0)
   println("Local Max " + lose_count+ " of ", steps.length+" with average of:"+ lose_avg/lose_count);
+  else
+    println("Local Max " + lose_count+ " of ", steps.length+" with average of:"+ 0);
+
 }
 //the empry draw function
 void draw() {
